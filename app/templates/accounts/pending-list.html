@@ -1,0 +1,210 @@
+{% extends "layouts/base.html" %}
+{% block title %}Registros pendientes{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style type="text/css">
+  select {
+    height: auto !important
+  }
+</style>
+{% endblock stylesheets %}
+{% block content %}
+
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createModalLabel">Seleccionar roles</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form role="form" method="post" id="role_modal" action="{{ url_for('blueprint.pending_accept')}}">
+          {{ form.hidden_tag() }}
+          <input id="pendingToAccept" name="pendingToAccept" type="hidden">
+          <div class="form-goup">
+            {{ form.roles }}
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <a href="#" class="btn btn-primary" onclick="$('#role_modal').submit()">Crear usuario</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Descartar solicitud</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form role="form" method="post" id="reject_modal" action="{{ url_for('blueprint.pending_reject')}}">
+          {{ form.hidden_tag() }}
+          <input id="pendingToReject" name="pendingToReject" type="hidden">
+          <span>
+            ¿Quiere descartar la solicitud de registro?
+          </span>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <a href="#" class="btn btn-primary" onclick="$('#reject_modal').submit()">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header card-header-primary">
+
+        <div class="fluid">
+
+          <div class="navbar-wrapper">
+            <h4 class="card-title ">Solicitudes de registro</h4>
+            <p class="card-category">Pendientes de aceptación</p>
+          </div>
+          <div class="navbar-collapse justify-content-end jeje">
+            <form class="navbar-form" id="locPageForm" action="{{ url_for('blueprint.pending_list')}}" method="POST">
+              <div class="input-group no-border">
+                <input type="text" name="search" value="" class="form-control jojo" placeholder="Buscar email...">
+                <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                  <i class="material-icons">search</i>
+                  <div class="ripple-container"></div>
+                </button>
+              </div>
+              <input type="hidden" value="1" name="page" id="page" />
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead class="text-primary">
+              <th>
+                Nombre de usuario
+              </th>
+              <th>
+                Nombre
+              </th>
+              <th>
+                Apellido
+              </th>
+              <th>
+                Email
+              </th>
+              <th>
+                Acciones
+              </th>
+            </thead>
+            <tbody>
+              {% for pending in pendings.items %}
+              <tr>
+                <td>
+                  {{ pending.username }}
+                </td>
+                <td>
+                  {{ pending.first_name }}
+                </td>
+                <td>
+                  {{ pending.last_name }}
+                </td>
+                <td>
+                  {{ pending.email }}
+                </td>
+                <td>
+
+                  <a class="material-icons" href="" onclick="createModal('{{pending.id}}'); return false;">check_circle
+                  </a>
+
+                  <a class="material-icons" href="" data-target="#exampleModal"
+                    onclick="deleteModal('{{pending.id}}'); return false;">remove_circle
+                  </a>
+
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Pagination Links-->
+
+  <div class="col-md-12">
+
+    {% if pendings.has_prev %}
+    <a href="" class="btn btn-outline-primary" onclick="goToPage('{{pendings.prev_num}}'); return false;">&laquo;</a>
+    {% else %}
+    <a href="#" class="btn btn-outline-dark">&laquo;</a>
+    {% endif %}
+
+
+    {% for page_num in pendings.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+    {% if page_num %}
+    <!-- Check for the active page and set the link to "active"-->
+    {% if pendings.page == page_num %}
+    <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-primary">
+      {{ page_num }}
+    </a>
+    {% else %}
+    <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-outline-primary">
+      {{ page_num }}
+    </a>
+    {% endif %}
+    {% else %}
+    ...
+    {% endif %}
+    {% endfor %}
+
+    {% if pendings.has_next %}
+    <a href="" onclick="goToPage('{{pendings.next_num}}'); return false;" class="btn btn-outline-primary">&raquo;</a>
+    {% else %}
+    <a href="#" class="btn btn-outline-dark">&raquo;</a>
+    {% endif %}
+    <p class="text-left mt-3" class="btn btn-outline-dark">
+      Mostrando página {{ pendings.page }} de {{ pendings.pages }}
+    </p>
+
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+
+  function createModal(id) {
+    $('#role_modal').trigger("reset");
+    $("#pendingToAccept").val(id);
+    $('#createModal').modal('show');
+  }
+
+  function deleteModal(id) {
+    $("#pendingToReject").val(id);
+    $('#deleteModal').modal('show');
+  }
+
+  function goToPage(page) {
+    $('#page').val(parseInt(page));
+    $('#locPageForm').submit();
+  }
+
+</script>
+
+{% endblock javascripts %}

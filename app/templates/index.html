@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Page Blank {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin="" />
+<style>
+  #map {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    outline: none;
+  }
+
+  .container-fluid {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+  }
+  .main-panel>.content {
+    padding: 0px !important;
+  }
+</style>
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <div id ="map">
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+  <script>
+    var mymap = L.map('map').setView([-34.922883,-57.956317], 13);
+
+    $( document ).ready(function() {
+        $.get( "/locations/all/coordinates", function( data ) {
+            data.results.forEach(coordinate =>  marker = L.marker([coordinate.latitude, coordinate.longitude]).addTo(mymap));
+        });
+    });
+
+
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+      maxZoom: 18,
+      id: 'mapbox/streets-v11',
+      tileSize: 512,
+      zoomOffset: -1,
+      accessToken: 'pk.eyJ1IjoiZnJhbjEyNCIsImEiOiJja3Vvcm9xODcwYnQ0MnZwZ2xycmJlNmM4In0.fLYzh2yA4-jSF1ufvVi_mQ'
+    }).addTo(mymap);
+
+  </script>
+{% endblock javascripts %}

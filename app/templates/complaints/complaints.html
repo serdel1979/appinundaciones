@@ -1,0 +1,325 @@
+{% extends "layouts/base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block head %}
+{% block stylesheets %}
+<style>
+    .input-group {
+      flex-direction: column;
+      align-items: end
+    }
+    .bmd-form-group {
+      width: 90%;
+    }
+    .form-control:disabled, .form-control[readonly] {
+        background-color: white !important;
+    }
+</style>
+{% endblock stylesheets %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+
+
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel"
+     aria-hidden="true" xmlns:width="http://www.w3.org/1999/xhtml">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customModalLabel"><span class="accion"></span> Denuncias</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span>
+                    ¿Esta seguro de <span class="accion"></span> la denuncia : <span style="font-weight: bolder" id="denuncia"></span> ?
+                </span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirm(url);setUrl('/')">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title ">Denuncias</h4>
+                <p class="card-category">Denuncias realizadas</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                    {% if 'complaint_create' in session["permisos"] %}
+                    <a href="{{ url_for('blueprint.nueva_denuncia')}}" class="btn btn-primary">
+                        <span class="material-icons">
+                            add
+                        </span>
+                        Nueva denuncia
+                    </a>
+                    {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <form action="{{ url_for('blueprint.denuncias_list')}}" method="POST" id="complaintPageForm">
+                            <div class="input-group no-border" style="display:content !important ">
+                                <div class="row" style="width:40%; float: right;">
+                                    {{ form.criteria(class="form-control", type="select", onchange="criterial_change()") }}
+                                </div>
+                                <div class="row" style="width:40%; float: right;">
+                                    <div  id="criteria_status" style="width:100% ; display: flex !important;">
+                                        {{ form.status(class="form-control", type="select", style="width: 90%") }}
+                                        <button type="submit" onclick="applyFilter()" class="btn btn-white btn-round btn-just-icon">
+                                            <i class="material-icons">search</i>
+                                            <div class="ripple-container"></div>
+                                        </button>
+                                    </div>
+                                    <div  id="criteria_date_range" style="width: 100%; display: flex !important;">
+                                        {{form.date_range(placeholder="Ingrese rango de fecha", class="form-control", type="text", style="margin-top: 10px")}}
+                                        <button type="submit" onclick="applyFilter()" class="btn btn-white btn-round btn-just-icon">
+                                            <i class="material-icons">search</i>
+                                            <div class="ripple-container"></div>
+                                        </button>
+                                    </div>
+                                    <div id="criteria_title" style="width: 100%; display: flex !important;">
+                                        {{ form.search(placeholder="Ingrese usuario a buscar", class="form-control", type="text") }}
+                                        <button type="submit" class="btn btn-white btn-round btn-just-icon" onclick="applyFilter()" >
+                                            <i class="material-icons">search</i>
+                                            <div class="ripple-container"></div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" value="1" name="page" id="page" />
+                            <input id="complaintId" name="complaintId" type="hidden">
+                            {{ form.range_from(type="hidden") }}
+                            {{ form.range_to(type="hidden") }}
+                        </form>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class=" text-primary">
+
+                            <th>
+                                Título
+                            </th>
+                            <th>
+                                Categoria
+                            </th>
+                            <th>
+                                Fecha de creación
+                            </th>
+                            <th>
+                                Fecha de cierre
+                            </th>
+                            <th>
+                                Estado
+                            </th>
+                            <th>
+                                Asignado a
+                            </th>
+                            <th>
+                                Denunciante
+                            </th>
+                            <th>
+                                Teléfono denunciante
+                            </th>
+
+                        </thead>
+                        <tbody>
+                            {% for complaint in complaints.items %}
+                            <tr>
+                                <td>
+                                    {{ complaint.title }}
+                                </td>
+                                <td>
+                                    {% if complaint.category %} 
+                                    {{ cat(complaint.category).name }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ complaint.created_at }}
+                                </td>
+                                <td>
+                                    {{ complaint.closed_date }}
+                                </td>
+                                <td>
+                                    {% if complaint.status %} 
+                                    {{ stat(complaint.status).name }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ complaint.user.username }}
+                                </td>
+                                <td>
+                                    {{ complaint.surname }}, {{complaint.name}}
+                                </td>
+                                <td>
+                                    {{ complaint.phone }}
+                                </td>
+                                <td>
+                                    <a class="material-icons" href="" data-target="#customModal"
+                                        onclick="showMessage('Cerrar denuncia','{{complaint.title}}','{{complaint.id}}'); setUrl('/close'); return false;" >backspace</a>
+                                    {% if 'complaint_update' in session["permisos"] %}
+                                        <a class="material-icons" href="{{ url_for('blueprint.edit_complaint', id=complaint.id)}}">edit</a>
+                                    {% endif %}
+                                    {% if 'complaint_destroy' in session["permisos"] %}
+                                    <a class="material-icons" href="" data-target="#customModal"
+                                        onclick="showMessage('Eliminar denuncia','{{complaint.title}}','{{complaint.id}}'); setUrl('/delete'); return false;">delete
+                                    </a>
+                                    {% endif %}
+                                    <a class="material-icons" href="{{ url_for('blueprint.denuncia_view', id=complaint.id)}}">info</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination Links-->
+    <div class="col-md-12">
+
+        {% if complaints.has_prev %}
+        <a href="" class="btn btn-outline-primary" onclick="goToPage('{{complaints.prev_num}}'); return false;">&laquo;</a>
+        {% else %}
+        <a href="#" class="btn btn-outline-dark">&laquo;</a>
+        {% endif %}
+
+
+        {% for page_num in complaints.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+        <!-- Check for the active page and set the link to "Active"-->
+        {% if complaints.page == page_num %}
+        <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-primary">
+            {{ page_num }}
+        </a>
+        {% else %}
+        <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-outline-primary">
+            {{ page_num }}
+        </a>
+        {% endif %}
+        {% else %}
+        ...
+        {% endif %}
+        {% endfor %}
+
+        {% if complaints.has_next %}
+        <a href="" onclick="goToPage('{{complaints.next_num}}'); return false;" class="btn btn-outline-primary">&raquo;</a>
+        {% else %}
+        <a href="#" class="btn btn-outline-dark">&raquo;</a>
+        {% endif %}
+
+        <p class="text-left mt-3" class="btn btn-outline-dark">
+            Mostrando página {{ complaints.page }} de {{ complaints.pages }}
+        </p>
+
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+    let url
+    var range_date;
+    $(document ).ready(function() {
+    if ($('#criteria').val() !== 'select_options') {
+                if($('#criteria').val() === 'title') {
+                    $('#criteria_title').show();
+                } else { $('#criteria_title').hide();
+                }
+                if($('#criteria').val() === 'status') {
+                    $('#criteria_status').show();
+                } else { $('#criteria_status').hide()};
+
+                if($('#criteria').val() === 'date_range') {
+                    $('#criteria_date_range').show();
+                } else { $('#criteria_date_range').hide();}
+    }
+    else {
+        $('#criteria_title').hide();
+        $('#criteria_date_range').hide();
+        $('#criteria_status').hide();
+       }
+
+     $('#date_range').daterangepicker({
+                    opens: 'left',
+                     locale: {
+                                 format: 'DD/MM/YYYY',
+                                 cancelLabel: 'Clear'
+                              }
+                  },function(start, end, label) {
+                  $('#range_from').val(start.format('YYYY-MM-DD'));
+                  $('#range_to').val(end.format('YYYY-MM-DD'));
+                  });
+    $('#date_range').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+      $('#range_from').val('');
+      $('#range_to').val('');
+    });
+    })
+    function showMessage(accion, complaint, id) {
+        $(".accion").text(accion);
+        $("#denuncia").text(complaint);
+        $("#complaintId").val(id);
+        $('#customModal').modal('show');
+    }
+
+    function applyFilter() {
+        $('#complaintPageForm').submit();
+    }
+
+
+    function setUrl(route) {
+        url = route;
+    }
+
+    function toggleInactive() {
+        $('#complaintPageForm').submit();
+    }
+
+    function confirm(url) {
+        $('#customModal').modal('hide');
+        location.replace("/denuncias/" + $("#complaintId").val() + url);
+    }
+
+    
+
+    function criterial_change() {
+        switch($('#criteria').val()) {
+            case 'title':
+                $('#criteria_title').show();
+                $('#criteria_status').hide();
+                $('#criteria_date_range').hide();
+                break;
+            case 'status':
+                $('#criteria_title').hide();
+                $('#criteria_status').show();
+                $('#criteria_date_range').hide();
+                break;
+            case 'date_range':
+                $('#criteria_title').hide();
+                $('#criteria_status').hide();
+                $('#criteria_date_range').show();
+                break;
+            case 'select_options':
+                $('#criteria_title').hide();
+                $('#criteria_status').hide();
+                $('#criteria_date_range').hide();
+                break;
+       }
+    }
+    function goToPage(page) {
+        $('#page').val(parseInt(page));
+        $('#complaintPageForm').submit();
+    }
+
+</script>
+{% endblock javascripts %}

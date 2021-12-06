@@ -1,0 +1,344 @@
+{% extends "layouts/base.html" %}
+{% block title %}Denuncia{% endblock %}
+{% block head %}
+{% block stylesheets %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+<link rel="stylesheet" type="text/css" href="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.css">
+
+<style>
+    #map {
+    height: 400px;
+    width: 100%;
+    }
+    #description {
+        width: 500px;
+        overflow: clip;
+        white-space: nowrap;
+    }
+
+</style>
+
+{% endblock stylesheets %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title">Denuncia {{ complaint.id }} </h4>
+            </div>
+            <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="colFormLabelSm" class="col-form-label-sm">Titulo:</label>
+                            <span class="col-lg-2"></span>
+                            {{ complaint.title }}
+                        </div>
+                        <div class="col-lg-6">
+                                   <label class="col-form-label-sm">Descripción:</label>
+                                    <span class="col-lg-12"></span>
+                                    {{ complaint.desc }}
+                                
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <div id="map"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Usuario:</label>
+                                {{ complaint.user.username }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Categoria:</label>
+                                {% if complaint.category %} 
+                                {{ cat(complaint.category).name }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Estado:</label>
+                                {% if complaint.status %} 
+                                {{ stat(complaint.status).name }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <label class="bmd-label-static">Denunciante</label>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Apellido</label>
+                                {{ complaint.surname }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Email</label>
+                                {{ complaint.email }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Telefono</label>
+                                {{ complaint.phone }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Nombre</label>
+                                {{ complaint.name }}
+                            </div>
+                        </div>
+                    </div>
+                   <div>
+                    </div>
+                    <a class="btn btn-primary pull-right" href="{{ url_for('blueprint.denuncias_list')}}">Volver</a>
+                    <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+
+
+
+
+<div class="modal fade bd-example-modal-lg" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel"
+     aria-hidden="true" >
+    <div class="modal-dialog modal-lg" role="document"> 
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">Seguimiento <span id="followUpId"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span>
+                    Descripcion : <span id="followUpDesc"></span> <br/>
+                    Autor : <span id="followUpAuthor"></span> <br/>
+                </span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel"
+     aria-hidden="true" xmlns:width="http://www.w3.org/1999/xhtml">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customModalLabel"><span class="accion"></span> Seguimiento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span>
+                    ¿Esta seguro de <span class="accion"></span> el seguimiento : <span style="font-weight: bolder" id="follow_up"></span> ?
+                </span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="confirm();setId('')">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="seguimientos">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title ">Seguimientos</h4>
+                <p class="card-category">seguimientos para la denuncia {{ complaint.id }}</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                    {% if 'followup_create' in session["permisos"] %}
+                    <a href="{{ url_for('blueprint.new_followup', complaint_id=complaint.id)}}" class="btn btn-primary">
+                        <span class="material-icons">
+                            add
+                        </span>
+                        Nuevo seguimiento
+                    </a>
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class=" text-primary">
+                            <th>
+                                ID
+                            </th>
+                            <th>
+                                Descripción
+                            </th>
+                            <th>
+                                Fecha de creación
+                            </th>
+                            <th>
+                                Responsable
+                            </th>
+
+                        </thead>
+                        <tbody>
+                            {% for follow_up in followups.items %}
+                            <div id=#followUpId data-id='{{ follow_up.id }}'></div>
+                            <tr>
+                                <td>
+                                    {{ follow_up.id }}
+                                </td>
+
+                                <td>
+                                    <div id="description">{{ follow_up.description }}</div>
+                                </td>
+                                <td>
+                                    {{ follow_up.created_at }}
+                                </td>
+                                <td>
+                                    {{ follow_up.author.username }}
+                                </td>
+
+                                <td>
+                                    {% if 'followup_update' in session["permisos"] %}
+                                        <a class="material-icons" href="{{ url_for('blueprint.update_followup', complaint_id=complaint.id, id=follow_up.id)}}">edit</a>
+                                    {% endif %}
+                                    {% if 'followup_destroy' in session["permisos"] %}
+                                    <a class="material-icons" href="" data-target="#customModal"
+                                        onclick="showMessage('Eliminar','{{ follow_up.id }}');setId('{{follow_up.id}}'); return false;">delete
+                                    </a>
+                                    {% endif %}
+                                    <a class="material-icons" href="" data-toggle="modal" data-target="#viewModal"
+                                    onclick="showFollowUp('{{ follow_up.id }}', '{{ follow_up.description}}', '{{follow_up.author.username}}'); 
+                                    return false;">info</a>
+                                </td>
+                            </tr>
+                            <form action="{{ url_for('blueprint.denuncia_view', id=complaint.id)}}" method="POST" id="followUpPageForm">
+                                <div class="input-group no-border" style="display:content !important ">
+                                    <input type="hidden" value="1" name="page" id="page" />
+                                    <input type="hidden" name="followUpId" id="followUpId" />
+                                    <input type="hidden" name="followUpDesc" id="followUpDesc" />
+                                    <input type="hidden" name="followUpAuthor" id="followUpAuthor" />
+                            </div>
+                            </form>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+ 
+
+    <!-- Pagination Links-->
+    <div class="col-md-12">
+
+        {% if followups.has_prev %}
+        <a href="" class="btn btn-outline-primary" onclick="goToPage('{{followups.prev_num}}'); return false;">&laquo;</a>
+        {% else %}
+        <a href="#" class="btn btn-outline-dark">&laquo;</a>
+        {% endif %}
+
+
+        {% for page_num in followups.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+        <!-- Check for the active page and set the link to "Active"-->
+        {% if followups.page == page_num %}
+        <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-primary">
+            {{ page_num }}
+        </a>
+        {% else %}
+        <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-outline-primary">
+            {{ page_num }}
+        </a>
+        {% endif %}
+        {% else %}
+        ...
+        {% endif %}
+        {% endfor %}
+
+        {% if followups.has_next %}
+        <a href="" onclick="goToPage('{{followups.next_num}}'); return false;" class="btn btn-outline-primary">&raquo;</a>
+        {% else %}
+        <a href="#" class="btn btn-outline-dark">&raquo;</a>
+        {% endif %}
+
+        <p class="text-left mt-3" class="btn btn-outline-dark">
+            Mostrando página {{ followups.page }} de {{ followups.pages }}
+        </p>
+
+    </div>
+</div>
+</div>
+{% endblock content %}
+
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+crossorigin=""></script>
+
+<script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
+<script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.js"></script>
+<script>
+    let follow_up_id
+    let mymap = L.map('map').setView(['{{ complaint.latitude }}', '{{ complaint.longitude }}'], 14);
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',{
+      maxZoom: 18,
+      id: 'mapbox/streets-v11',
+      tileSize: 512,
+      zoomOffset: -1,
+      accessToken: 'pk.eyJ1IjoiZnJhbjEyNCIsImEiOiJja3Vvcm9xODcwYnQ0MnZwZ2xycmJlNmM4In0.fLYzh2yA4-jSF1ufvVi_mQ'
+    }).addTo(mymap);
+    marker = L.marker(['{{ complaint.latitude }}', '{{ complaint.longitude }}']).addTo(mymap)
+    
+    function showMessage(accion, follow_up, id) {
+        $(".accion").text(accion);
+        $('#follow_up').text(follow_up)
+        $("#followUpId").val(id);
+        $('#customModal').modal('show');
+    }
+
+    function showFollowUp(id, description, name) {
+        $("#followUpId").text(`${id}`);
+        $('#followUpDesc').text(description)
+        $("#followUpAuthor").text(name);
+        $('#viewModal').modal('show');
+    }
+
+
+    function goToPage(page) {
+        $('#page').val(parseInt(page));
+        $('#followUpPageForm').submit();
+    }
+    function setId(id) {
+        follow_up_id = id;
+    }
+  
+    function confirm() {
+        $('#customModal').modal('hide');
+        location.replace("/denuncias/" + '{{ complaint.id }}' + "/followup/" + follow_up_id +"/delete");
+    }
+
+
+</script>
+{% endblock javascripts %}

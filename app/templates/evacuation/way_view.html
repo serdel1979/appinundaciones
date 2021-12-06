@@ -1,0 +1,102 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Page Zones {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+<style>
+    #map {
+        width: 100%;
+        height: 400px;
+        position: relative;
+        outline: none;
+    }
+</style>
+
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title">Detalle del camino</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Nombre</label>
+                            {{ way.name }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Descripción</label>
+                            {{ way.description }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Publicado</label>
+                            {% if way.published %} SI {% else %} NO {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Cantidad de puntos</label>
+                            {{ way.amount_points() }}
+                        </div>
+                    </div>
+                </div>
+                <div id="map"></div>
+                <a class="btn btn-primary pull-right" href="{{ url_for('blueprint.way_list')}}">Volver</a>
+                <div class="clearfix"></div>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+<script>
+
+
+var mymap = L.map('map').setView([{{lat}},{{long}}],14);
+
+
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',{
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'pk.eyJ1IjoiZnJhbjEyNCIsImEiOiJja3Vvcm9xODcwYnQ0MnZwZ2xycmJlNmM4In0.fLYzh2yA4-jSF1ufvVi_mQ'
+}).addTo(mymap);
+
+var lin = []
+{% for punto in linea %}
+    lin.push({{punto| safe }})
+{% endfor %}
+
+var polyline = L.polyline(lin, {color: 'red'}).addTo(mymap);
+mymap.fitBounds(polyline.getBounds());
+
+   
+
+
+</script>
+
+{% endblock javascripts %}

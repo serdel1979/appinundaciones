@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Login {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style type="text/css">
+  select {
+    height: auto !important
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title">
+          Crear usuario
+        </h4>
+      </div>
+      <div class="card-body">
+
+        <h6 class="card-category">
+          Ingrese los datos requeridos
+        </h6>
+
+        <br />
+
+        <!-- Hide the form on success -->
+        {% if not success %}
+        <form role="form" method="post" action="">
+
+          {{ form.hidden_tag() }}
+
+          <div class="input-group mb-3">
+            {{ form.username(placeholder="Usuario", class="form-control") }}
+          </div>
+
+          <div class="input-group mb-3">
+            {{ form.first_name(placeholder="Nombre", class="form-control") }}
+          </div>
+
+          <div class="input-group mb-3">
+            {{ form.last_name(placeholder="Apellido", class="form-control") }}
+          </div>
+
+          <div class="input-group mb-3">
+            {{ form.email(placeholder="Email", class="input form-control", type="email") }}
+          </div>
+
+          <div class="input-group mb-4">
+
+            {{ form.password(placeholder="Contraseña", class="form-control", type="password") }}
+          </div>
+          <div class="input-group mb-4">
+            {{ form.retry_password(placeholder="Repita contraseña", class="form-control", type="password") }}
+          </div>
+          <div class="input-group mb-4">
+            {{ form.roles.label }}
+            <div class="input-group mb-4">
+              {{ form.roles(placeholder="Roles", label="Roles", class="form-group") }}
+            </div>
+          </div>
+          <button type="submit" name="register" style="width:100%"
+            class="btn btn-primary shadow-2 md-5">Registrar usuario</button>
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

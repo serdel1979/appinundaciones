@@ -1,0 +1,9 @@
+#map {
+    height: 400px;
+    width: 100%;
+}
+
+
+#lat, #lng {
+    display: none;
+}

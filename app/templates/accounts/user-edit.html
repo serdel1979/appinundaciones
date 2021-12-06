@@ -1,0 +1,87 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Page User {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title">Editar usuario</h4>
+        <p class="card-category">Complete los datos del usuario</p>
+      </div>
+      <div class="card-body">
+        <form action="{{ url_for('blueprint.user_update', id=user.id) }}" method="POST">
+          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+          <input type="hidden" name="id" value="{{ user.id }}">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="bmd-label-floating">Usuario</label>
+                <input type="text" name="username" class="form-control" value="{{ user.username }}">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="bmd-label-floating">Email</label>
+                <input type="email" name="email" class="form-control" value="{{ user.email }}">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="bmd-label-floating">Nombre</label>
+                <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="bmd-label-floating">Apellido</label>
+                <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+              </div>
+            </div>
+            {% if 'usuario_update' in session["permisos"] %}
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="bmd-label-floating">Roles</label>
+                <select style="height:auto" name="roles" multiple class="form-control">
+                  {% for r in roles %}
+                  {% if r.name in user.roles %}
+                  <option selected value="{{ r.id }}">{{ r.name }}</option>
+                  {% else %}
+                  <option value="{{ r.id }}">{{ r.name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if 'administrador' not in user.roles  %}
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                </label>Activo</label><br>
+                <input type="checkbox" id="active" name="active" {% if user.active == True %} checked {% endif %} value="y">
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          <button type="submit" class="btn btn-primary pull-right">Guardar cambios</button>
+          <a class="btn btn-primary pull-right" href="{{ url_for('blueprint.user_list')}}">Volver</a>
+          <div class="clearfix"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

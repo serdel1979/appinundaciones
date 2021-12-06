@@ -1,0 +1,55 @@
+# byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# tests and coverage
+*.pytest_cache
+.coverage
+
+# database & logs
+*.db
+*.sqlite3
+*.log
+db.sqlite3
+
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# other
+.DS_Store
+
+# sphinx docs 
+_build
+_static
+_templates
+web
+
+# javascript
+package-lock.json
+.vscode/symbols.json
+
+
+
+flask_session
+.vim
+coc-settings.json
+.vscode
+runtime.txt
+
+# macOS
+.DS_Store
+
+# docker
+docker-compose.yml
+
+# mariadb docker folder
+db

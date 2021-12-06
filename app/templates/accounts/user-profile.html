@@ -1,0 +1,72 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Page User {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title">Mi perfil</h4>
+        {% if current_user.is_google_user() %}
+        <p class="card-category">Datos importados de su cuenta de Google</p>
+        {% else %}
+        <p class="card-category">Información de mi perfil</p>
+        {%endif%}
+      </div>
+      <div class="card-body">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <input type="hidden" name="id" value="{{ user.id }}">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label class="bmd-label-floating">Usuario:</label>
+              {{ user.username }}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label class="bmd-label-floating">Email:</label>
+              {{ user.email }}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label class="bmd-label-floating">Nombre:</label>
+              {{ user.first_name }}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label class="bmd-label-floating">Apellido:</label>
+              {{ user.last_name }}
+            </div>
+          </div>
+        </div>
+        {% if not current_user.is_google_user() %}
+        <div class="row">
+          <div class="col-md-12" style="text-align:right">
+            <a href="{{ url_for('blueprint.reset_password')}}" class="btn btn-primary">
+              <span class="material-icons">refresh</span> Cambiar contraseña
+            </a>
+            <a href="{{ url_for('blueprint.edit_profile', id=user.id)}}" class="btn btn-primary">
+              <span class="material-icons">edit</span> Editar perfil
+            </a>
+          </div>
+        </div>
+        {% endif %}
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

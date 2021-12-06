@@ -1,0 +1,93 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Login {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style type="text/css">
+  .btn.btn-secondary {
+    background-color: #e4e2e2 !important
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customModalLabel">Confirmar envío</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <span>
+          Se enviará una solicitud de registro, un administrador la evaluará.
+        </span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <a href="{{ url_for('blueprint.google_signup') }}" class="btn btn-primary">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header card-header-primary">
+
+        <h4 class="card-title">
+          Iniciar sesión
+        </h4>
+      </div>
+      <div class="card-body">
+        <br />
+        <form role="form" method="post" action="{{ url_for('blueprint.login') }}">
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Nombre de usuario</label>
+                <input name="username" type="text" class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <br />
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Contraseña</label>
+                <input name="password" type="password" class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <p class="mb-0 text-muted">¿No tenés aún una cuenta?
+            <a href="" data-target="#customModal" onclick="$('#customModal').modal('show'); return false;">Registrate
+              con tu cuenta de
+              Google</a>
+          </p>
+          <br />
+
+          <div class="text-center">
+            <button type="submit" name="login" class="btn btn-primary">Ingresar</button>
+            <a href="{{ url_for('blueprint.google_login') }}" class="btn btn-secondary">Ingresar con Google</a>
+          </div>
+          &nbsp; &nbsp;
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

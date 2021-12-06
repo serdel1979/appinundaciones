@@ -1,0 +1,69 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Login {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+<style>
+    #map {
+        width: 100%;
+        height: 400px;
+        position: relative;
+        outline: none;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title">
+                    Registrar camino
+                </h4>
+            </div>
+            <div class="card-body">
+
+                <h6 class="card-category">
+                    Ingrese un nombre y una descripción
+                </h6>
+
+                <br />
+
+                <!-- Hide the form on success -->
+                {% if not success %}
+                <form role="form" method="post" action="">
+
+                    {{ form.hidden_tag() }}
+
+                    <div class="input-group mb-3">
+                        {{ form.name(placeholder="Nombre", class="form-control") }}
+                    </div>
+
+                    <div class="input-group mb-3">
+                        {{ form.description(placeholder="Descriptición", class="form-control") }}
+                    </div>
+
+                    <button type="submit" name="addway" style="width:100%"
+                        class="btn btn-primary shadow-2 md-5">Agregar coordenadas</button>
+                    <a class="btn btn-primary pull-right" style="width:100%" href="{{ url_for('blueprint.way_list')}}">Cancelar</a>
+                </form>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+
+{% endblock javascripts %}

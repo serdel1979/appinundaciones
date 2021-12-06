@@ -1,0 +1,101 @@
+    <div class="sidebar" data-color="purple" data-background-color="white" data-image="/static/assets/img/lp.jpg">
+      <div class="logo">
+        <a target="_self" rel="noopener noreferrer" 
+           href="/" class="simple-text logo-normal">
+          {{session["username"]}}
+        </a>
+      </div>
+      <div class="sidebar-wrapper">
+        
+        <ul class="nav">
+
+          {% if current_user.is_authenticated %}
+          <li class="nav-item {% if 'index' in segment %} active {% endif %}">
+            <a class="nav-link" href="{{ url_for('blueprint.index') }}">
+              <i class="material-icons">dashboard</i>
+              <p>Vista principal</p>
+            </a>
+          </li>
+          {% if 'usuario_index' in session['permisos'] %}
+          <li class="nav-item {% if 'ui-tables' in segment %} active {% endif %}">
+            <a class="nav-link" href="{{ url_for('blueprint.user_list') }}">
+              <i class="material-icons">people_alt</i>
+              <p>Usuarios</p>
+            </a>
+          </li>
+          {% endif %}
+          {% if 'configuracion_app_update' in session["permisos"] %}
+          <li class="nav-item {% if 'configuration' in segment %} active {% endif %}">
+            <a class="nav-link" href="{{ url_for('blueprint.edit_config') }}">
+              <i class="material-icons">dvr</i>
+              <p>Configuración</p>
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item {% if 'ui-maps' in segment %} active {% endif %}">
+            <a class="nav-link" href="{{ url_for('blueprint.location_list') }}">
+              <i class="material-icons">location_ons</i>
+              <p>Puntos de Encuentro</p>
+            </a>
+          </li>
+        </li>
+          <li class="nav-item {% if 'ui-maps' in segment %} active {% endif %}">
+            <a class="nav-link" href="{{ url_for('blueprint.denuncias_list') }}">
+              <i class="material-icons">report</i>
+              <p>Denuncias</p>
+            </a>
+          </li>
+          {% if 'zona_show' in session['permisos'] %}
+          <li class="nav-item ">
+            <a class="nav-link" href="{{ url_for('blueprint.zonas') }}" >
+              <i class="material-icons">location_ons</i>
+              <p>Zonas inundables</p>
+            </a>
+          </li>
+          {% endif %}
+          {% if 'solicitud_index' in session['permisos'] %}
+          <li class="nav-item ">
+            <a class="nav-link" href="{{ url_for('blueprint.pending_list') }}" >
+              <i class="material-icons">assignment_ind</i>
+              <p>Solicitudes</p>
+            </a>
+          </li>
+          {% endif %}
+          {% if 'evacuacion_show' in session['permisos'] %}
+          <li class="nav-item ">
+            <a class="nav-link" href="{{ url_for('blueprint.way_list') }}" >
+              <i class="material-icons">location_ons</i>
+              <p>Evacuación</p>
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item {% if 'user-list' in segment %} active {% endif %}">
+            <a class="nav-link" href="{{ url_for('blueprint.user_profile') }}">
+              <i class="material-icons">person</i>
+              <p>Perfil</p>
+            </a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="{{ url_for('blueprint.logout') }}" >
+              <i class="material-icons">directions_run</i>
+              <p>Cerrar sesión</p>
+            </a>
+          </li>
+
+         
+          {% else %}
+          <li class="nav-item ">
+            <a target="_blank" rel="noopener noreferrer"  
+               class="nav-link" href="">
+              <i class="material-icons">cloud_download</i>
+              <p>Nada por ahora</p>
+            </a>
+          </li>
+          {% endif %}
+
+        </ul>
+
+
+      </div>
+
+    </div>

@@ -1,0 +1,225 @@
+{% extends "layouts/base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customModalLabel"><span class="accion"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span>
+                    ¿Esta seguro de <span class="accion"></span> la zona de inundación <span style="font-weight: bolder" id="name"></span> ?
+                </span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="confirm()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleFileModalLabel">Carga de zonas inundables</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="file-loading">
+                    <form action="{{ url_for('blueprint.upload_zonas')}}" enctype="multipart/form-data" method="POST" id="filePageForm">
+                        <input id="file-input" name="file-input[]" multiple type="file">
+                    </form>
+                </div>
+                <div id="kartik-file-errors"></div>
+                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" type="submit" onclick="$('#filePageForm').submit();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title ">Zonas inundables</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                    {% if 'zona_import' in session['permisos'] %}
+                    <button href="" class="btn btn-primary" onclick="$('#fileModal').modal('show')">
+                        <span class="material-icons" >
+                            add
+                        </span>
+                        Importar
+                    </button>
+                    {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <!-- <input id="file-input" name="file-input[]" type="file" class="file" data-show-preview="false"  data-allowed-file-extensions='["csv"]' multiple-->
+                        <form action="{{ url_for('blueprint.zonas')}}" enctype="multipart/form-data" method="POST" id="zonePageForm">
+                            <div class="input-group no-border">
+                                {{ form.search(placeholder="Ingrese nombre de zona a buscar", class="form-control", type="text") }}
+                                <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                                    <i class="material-icons">search</i>
+                                    <div class="ripple-container"></div>
+                                </button>
+                            </div>
+                            <input type="hidden" value="1" name="page" id="page" />
+                            <input id="zoneId" name="zoneId" type="hidden">
+                            <div style="float: right" class="row">
+                                {{ form.active(placeholder="Mostrar zonas despublicadas",type="checkbox" , style="margin-top: 2px; margin-right: 2px" , onclick="toggleInactive()") }}
+                                {{ form.active.label }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class=" text-primary">
+
+                            <th>
+                                Nombre
+                            </th>
+                            <th>
+                                Publicado
+                            </th>
+                            <th>
+                                Codigo
+                            </th>
+                            <th>
+                                Acciones
+                            </th>
+                        </thead>
+                        <tbody>
+                            {% for zona in zonas.items %}
+                            <tr>
+                                <td>
+                                    {{ zona.name }}
+                                </td>
+                                <td>
+                                    {% if zona.published %}
+                                    <a class="material-icons" href="{{ url_for('blueprint.publicar_despublicar_zona', id=zona.id)}}">radio_button_checked
+                                    </a>
+                                    {% else %}
+                                    <a class="material-icons" href="{{ url_for('blueprint.publicar_despublicar_zona', id=zona.id)}}">radio_button_unchecked
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                   {{ zona.code }} 
+                                </td>
+                                <td>
+                                
+                                    {% if 'zona_destroy' in session['permisos'] %}
+                                    <a class="material-icons" href="" data-target="#customModal"
+                                        onclick="showMessage('Eliminar','{{zona.name}} ','{{zona.id}}'); return false;">delete</a>
+                                    {% endif %}
+                                    {% if 'zona_show' in session['permisos'] %}
+                                    <a class="material-icons" href="{{ url_for('blueprint.zone_view', id=zona.id)}}">forward</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination Links-->
+    <div class="col-md-12">
+
+        {% if zonas.has_prev %}
+        <a href="" class="btn btn-outline-primary" onclick="goToPage('{{zonas.prev_num}}'); return false;">&laquo;</a>
+        {% else %}
+        <a href="#" class="btn btn-outline-dark">&laquo;</a>
+        {% endif %}
+
+
+        {% for page_num in zonas.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+        <!-- Check for the active page and set the link to "Active"-->
+        {% if zonas.page == page_num %}
+        <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-primary">
+            {{ page_num }}
+        </a>
+        {% else %}
+        <a href="" onclick="goToPage('{{page_num}}'); return false;" class="btn btn-outline-primary">
+            {{ page_num }}
+        </a>
+        {% endif %}
+        {% else %}
+        ...
+        {% endif %}
+        {% endfor %}
+
+        {% if zonas.has_next %}
+        <a href="" onclick="goToPage('{{zonas.next_num}}'); return false;" class="btn btn-outline-primary">&raquo;</a>
+        {% else %}
+        <a href="#" class="btn btn-outline-dark">&raquo;</a>
+        {% endif %}
+
+        <p class="text-left mt-3" class="btn btn-outline-dark">
+            Mostrando página {{ zonas.page }} de {{ zonas.pages }}
+        </p>
+
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+    function showMessage(accion, name, id) {
+        $(".accion").text(accion);
+        $("#name").text(name);
+        $("#zoneId").val(id);
+        $('#customModal').modal('show');
+    }
+
+    function toggleInactive() {
+        $('#zonePageForm').submit();
+    }
+
+    function confirm() {
+        $('#customModal').modal('hide');
+        location.replace("/zone_delete/" + $("#zoneId").val());
+    }
+    $(document).ready(function() {
+
+    $("#file-input").fileinput({
+        showPreview: false,
+        showUpload: false,
+        elErrorContainer: '#kartik-file-errors',
+        allowedFileExtensions: ["csv"]
+    });
+   });
+function handler() {
+}
+    function goToPage(page) {
+        $('#page').val(parseInt(page));
+        $('#active').val(active)
+        $('#zonePageForm').submit();
+    }
+
+</script>
+{% endblock javascripts %}
